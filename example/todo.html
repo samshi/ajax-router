@@ -1,0 +1,196 @@
+<link href="/exceljs/todo/bootstrap.min.css" rel="stylesheet"/>
+<link href="/exceljs/todo/font-awesome.min.css" rel="stylesheet"/>
+<link href="/exceljs/todo/beyond.min.css" rel="stylesheet" id="beyond-link" type="text/css"/>
+<link href="/exceljs/todo/dataTables.bootstrap.css" rel="stylesheet"/>
+<link href="/exceljs/todo/myapp.css" rel="stylesheet"/>
+<link rel="stylesheet" href="todo.css">
+
+
+<section>
+  <header id="header">
+    <a href="#excel">click to excel</a>
+
+    <h1>todos</h1>
+    <input id="F1" placeholder="What needs to be done?" autofocus onblur="F(F1='')"/>
+  </header>
+  <section id="main" style="display: block;">
+    <input id="E1" type="checkbox" background="=IF(E1!==!!E1,'#eee')"/>
+    <ul id="H1">
+      <li class="={completed:$this.state, editing:$index==G1}" ng-display="=B1==2 || $this.state!=B1">
+        <div class="view">
+          <input name="state" class="toggle" type="checkbox" onclick="F(A1[$this.index].state=$value)">
+          <label name="title" ondblclick="F(G1=$index)"></label>
+          <button class="destroy" onclick="F(A1.splice($this.index, 1))"></button>
+        </div>
+        <input name="title" class="edit" focusme="=IF($index==G1, 1)" onblur="F(A1[$this.index].title=$value, G1=-1)"/>
+      </li>
+    </ul>
+  </section>
+
+  <div class="row DTTTFooter">
+    <table width="90%" style="margin-left:50px;">
+      <tr>
+        <td>
+          <div class="dataTables_info" id="I7" role="status" aria-live="polite">
+          </div>
+        </td>
+        <td>
+          <div class="dataTables_paginate paging_bootstrap">
+            <ul id="I11" class="pagination">
+              <li class="={prev:$this.isprev, disabled:$this.isdisabled, active:$this.isactive, next:$this.isnext}">
+                <span name="num" onclick="F(I2=IF($this.isdisabled, I2, IF($index==0, I2-1, IF($index>I3, I2+1, $index))))"></span>
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <footer id="footer" style="display: block;">
+    <span id="todo-count"><strong id="D1"></strong> item left</span>
+    <ul id="GG">
+      <li>
+        <span class="={selected:B1==2}" onclick="F(B1=2)">All</span>
+      </li>
+      <li>
+        <span class="={selected:B1==1}" onclick="F(B1=1)">Active</span>
+      </li>
+      <li>
+        <span class="={selected:B1==0}" onclick="F(B1=0)">Completed</span>
+      </li>
+    </ul>
+    <button id="C3" onclick="F(DELETE(1, A1, {state: true}))"></button>
+  </footer>
+</section>
+
+<script>
+  ROUTER.addEvent('todo', {
+    init: function(scope){
+      scope.abc = '零极限';
+    },
+    load: function(){
+      EXCEL && EXCEL.begin('todo');
+    }
+  });
+
+  // 定义依赖关系，对其中顶级属性监控
+  EXCEL.addPage('todo', {
+    A1: [
+      {
+        title: 'teambition',
+        state: true
+      }, {
+        title: 'jira',
+        state: true
+      }, {
+        title: 'mail.woyouxinxi.com',
+        state: true
+      }, {
+        title: 'wifi',
+        state: true
+      }, {
+        title: 'phpstorm',
+        state: true
+      }, {
+        title: 'sourcetree',
+        state: true
+      }, {
+        title: 'wamp',
+        state: true
+      }, {
+        title: 'vpn',
+        state: false
+      }, {
+        title: 'vpn2',
+        state: true
+      }
+    ],
+    B1: 2,                        //filter
+    E1: false,                    //checkbox all
+    F1: '',                       //new item
+    G1: -1,                       //edit now
+    I1: 3,                        //items per page
+    I2: 2,                        //page now [1,2,3 ...]
+
+    A2: '=COUNTA(A1);',
+    B2: '=FILTER(A1, "B1==2 || $this.state!=B1", E1=C2); //A1, B1',
+    C1: '=ATTR(A1, "state")',
+    F2: '=F1.trim()',
+
+    C2: '=COUNTIF(C1, "===true");',
+    D1: '=COUNTA(B2);',
+    F3: '=UNSHIFT(F2.length, A1, {title:F2, state:false}); //F2',
+
+    C3: '="Clear completed "+C2',
+    D2: '=E1= C2>0 && C2<A2 ? C2 : !!C2; //C2, A2',
+    I3: '=Math.ceil(D1/I1)',      //pages count
+
+    E2: '=UPDATE(E1===!!E1, A1, {state:E1}); //E1, D2',
+    I4: '=BETWEEN(1, I3, I2)',
+
+    H1 : '=SLICE(B2, (I4-1)*I1, I4*I1)',
+    I5 : '=MIN((I4-1)*I1+1, D1)',           //item from 1,2,3 ...
+    I8 : '=BTN(I3, I4)',
+    I9 : '={isprev:true, isnext:false, isactive:false, isdisabled:I4==1, num:"上页"}',
+    I10: '={isprev:false, isnext:true, isactive:false, isdisabled:I4>=I3, num:"下页"}',
+
+    I6 : '=MIN(I5+I1-1, D1)',      //item to
+    I11: "=CONCAT(I9, I8, I10)",
+
+    I7: "='显示 '+I5+' 到 '+I6+' 条，一共 '+D1+' 条'"
+
+  });
+
+  function FILTER(arr, condition){
+    var out = [];
+    var item;
+    for(var i = 0, l = arr.length; i < l; i++){
+      var $this = arr[i];
+      if(eval(condition)){
+        item       = JSON.parse(JSON.stringify(arr[i]));
+        item.index = i;
+        out.push(item);
+      }
+    }
+    return out;
+  }
+
+  function BTN(pages_num, now){
+    var out = [];
+    for(var i = 1; i <= pages_num; i++){
+      out.push({
+        isprev    : false,
+        isnext    : false,
+        isactive  : i == now,
+        isdisabled: i == now,
+        num       : i
+      });
+    }
+    return out;
+  }
+
+  function SLICE(arr, from, end){
+    var out = [];
+    var item;
+    for(var i = from; i < end && arr[i]; i++){
+      item = JSON.parse(JSON.stringify(arr[i]));
+      if(!('index' in item)){
+        item.index = i;
+      }
+      out.push(item);
+    }
+    return out;
+  }
+
+  function ARR(from, to){
+    var arr = [];
+    for(var i = from; i <= to; i++){
+      arr.push(i)
+    }
+    return arr;
+  }
+
+  function F(){
+  }
+</script>

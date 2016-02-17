@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>hhhtest</title>
+  <style>
+    #_view, #view2 {
+      height: 400px;
+      width: 100%;
+      border: 1px solid gray;
+      margin: 20px;
+      overflow: auto;
+    }
+
+    [_href] {
+      border: 1px solid red;
+    }
+
+  </style>
+</head>
+<div id="router">
+  <a href="#excel">excel</a>
+  <a href="#excel@view2">excel@view2</a>
+  <a href="#todo">todo</a>
+  <a href="#error">error</a>
+  <a href="#notexist">notexist</a>
+  <a href="#otherwise@view2">otherwise@view2</a>
+  <a href="">/</a>
+
+  <div id="E">
+    <input type="text" id="A1" value="9"/>
+    <!-- form 会把监听到的回车当成页面刷新 -->
+    <!--<form></form>-->
+    <!--<input type="reset">-->
+
+    <div id="A2"></div>
+    <div id="A3"></div>
+<button onclick="cros()">do cors</button>
+    <div id="_view"></div>
+    <!--<div id="view2"></div>-->
+  </div>
+</div>
+</body>
+</html>
+<script src="js/router.js"></script>
+<script src="/observe/observe_change.js"></script>
+<script src="/exceljs/binding.js"></script>
+<script src="/exceljs/excelfunction.js"></script>
+<script>
+  ROUTER.config({
+    main     : 'router',    // default document.body
+    view     : '_view',     // default target '_view'
+    otherwise: 'otherwise', // default 'otherwise'
+    notexist : 'otherwise'  // default 'notexist'
+  });
+
+  EXCEL.config({
+    root: 'E'         // default 'exceljs'
+  });
+
+  EXCEL.addPage(EXCEL.root, {
+    A2: '=A1*2',
+    A3: '=+excel.A1+A2+todo.D1'
+  });
+
+  EXCEL.begin();
+
+  function cros(){
+    var _z = false; //xmlHTTP
+    if(window.XMLHttpRequest){ // Mozilla, Safari,...
+      if(typeof(window.XMLHttpRequest)=='function' || typeof(window.XMLHttpRequest)=='object'){
+        _z = new XMLHttpRequest();
+      }else{
+        _z = new ActiveXObject("Microsoft.XMLHTTP");
+      }
+    }else if(window.ActiveXObject){ // IE
+      try {		_z = new ActiveXObject('Msxml2.XMLHTTP')
+      } catch(e){
+        try {	_z = new ActiveXObject('Microsoft.XMLHTTP')
+        } catch(e){}
+      }
+    }
+
+    var url = 'http://121.42.58.44:81/gitindex.php';
+    var fun = function(response){
+      console.log(response);
+    };
+    var type = 'get';
+    var content = 'a=1&b=2';
+    var syc = 'syc';
+    _z.open(type, type=='get' ? url+'?'+content : url, syc==='syc' ? false : true);
+
+if('withCredentials' in _z){
+  console.log('XMLHttpRequest object has a "withCredentials" property');
+}else{
+  console.log('CORS is not supported by the browser');
+}
+//    _z.setRawHeader('HTTP/1.1 200 OK');
+//    _z.setStatusCode(200, 'OK');
+    _z.setRequestHeader('Access-Control-Allow-Origin', 'http://localhost');
+    _z.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type');
+    _z.setRequestHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    _z.setRequestHeader('Access-Control-Allow-Credentials', 'true');
+    _z.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    _z.onreadystatechange = function(){
+      if(_z.readyState==4 && _z.status==200){
+        fun(_z.responseText)
+      }
+    }
+    _z.send(type=='get' ? 'NULL' : (content || 'NULL'))
+  }
+
+  this.setRequest = function(url,fun,content,type){
+    $.OUT = url+'?'+content;
+    _z.open(type, type=='get' ? url+'?'+content : url, a==='syc' ? false : true);
+    _z.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    _z.onreadystatechange = function(){
+      if(_z.readyState==4 && _z.status==200){
+        fun(_z.responseText)
+      }
+    }
+    _z.send(type=='get' ? 'NULL' : (content || 'NULL'))
+  }
+</script>

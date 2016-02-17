@@ -1,0 +1,11 @@
+<h1>hello notexist {{abc}} page!</h1>
+<a href="#excel">click to excel</a>
+<script>
+  ROUTER.addEvent('notexist', {
+    init: function(scope){
+      scope.abc = 'notexist';
+      console.log(555);
+    }
+  });
+  console.log(444);
+</script>
